@@ -1,0 +1,38 @@
+# Configuration for data ingestion and preprocessing
+
+data:
+  # Directory containing the raw SPAFF code CSV files.
+  raw_dir: /Users/cartersale/Research/Projects/TherapyData/SPAFF
+  # Directory where the processed Parquet files will be saved.
+  processed_dir: data/processed
+
+ingestion:
+  # Path to the CSV file containing the SPAFF code legend.
+  # This file should have 'code_number' and 'valence' columns.
+  legend_path: spaff_codes.csv
+  
+  # Regular expression to parse dyad and session from filenames.
+  # It must contain named capture groups 'dyad' and 'session'.
+  filename_pattern: "(?P<dyad>\\d+)(?P<session>[A-Z])_.*\\.csv"
+  
+  # Mapping from valence strings in the legend to integer codes.
+  collapse_map:
+    "Positive": 1
+    "Negative": -1
+    "Neutral": 0
+ 
+# Debouncing settings to remove short-lived states.
+debounce:
+  # Set to true to enable debouncing.
+  enabled: true
+  # The minimum length of a run of a certain code to be kept.
+  k: 2
+
+# Windowing settings to segment the time series data.
+windowing:
+  # Set to true to enable windowing.
+  enabled: true
+  # The length of each window in seconds.
+  window_sec: 60
+  # The fraction of overlap between consecutive windows (must be in [0, 1)).
+  overlap: 0.5

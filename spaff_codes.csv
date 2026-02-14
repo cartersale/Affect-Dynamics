@@ -1,0 +1,22 @@
+code_number,code_name,valence
+1,Disgust,Negative
+2,Contempt,Negative
+3,Belligerence,Negative
+4,Low Domineering,Negative
+5,High Domineering,Negative
+6,Criticism,Negative
+7,Anger,Negative
+8,Tension,Negative
+9,Tense Humor,Negative
+10,Defensive,Negative
+11,Whining,Negative
+12,Sadness,Negative
+13,Stonewalling,Negative
+14,Neutral,Neutral
+15,Interest,Positive
+16,Low Validation,Positive
+17,High Validation,Positive
+18,Affection,Positive
+19,Humor,Positive
+20,Surprise/Joy,Positive
+21,Physical Affection,Positive
