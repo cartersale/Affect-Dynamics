@@ -17,21 +17,21 @@ ingestion:
   
   # Mapping from valence strings in the legend to integer codes.
   collapse_map:
-    "Positive": 1
-    "Negative": -1
-    "Neutral": 0
+    Negative: 0
+    Neutral: 1
+    Positive: 2
  
 # Debouncing settings to remove short-lived states.
 debounce:
   # Set to true to enable debouncing.
-  enabled: true
+  enabled: false
   # The minimum length of a run of a certain code to be kept.
-  k: 2
+  k: 1
 
 # Windowing settings to segment the time series data.
 windowing:
   # Set to true to enable windowing.
-  enabled: true
+  enabled: false
   # The length of each window in seconds.
   window_sec: 60
   # The fraction of overlap between consecutive windows (must be in [0, 1)).
