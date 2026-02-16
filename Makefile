@@ -6,7 +6,8 @@ ingest-preprocess:
 	python scripts/01_ingest_and_preprocess.py --config configs/ingest_and_preprocess.yaml
 
 analysis:
-	python scripts/03_coupled_test.py --config configs/analysis.yaml
+	python scripts/02_coupling_test.py --config configs/analysis.yaml
+	python scripts/03_fit_shared_hmm.py --config configs/analysis.yaml
 
 notebooks:
 	python scripts/run_notebook.py notebooks/coupling_test.ipynb
