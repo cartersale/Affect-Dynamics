@@ -1,0 +1,26 @@
+# Configuration for the main analysis script.
+
+data:
+  # Directory where the processed Parquet files are located.
+  processed_dir: data/processed
+
+analysis:
+  # Directory where the analysis results (CSV files) will be saved.
+  out_dir: artifacts/
+
+  # Number of folds for cross-validation. Dyads are kept together in folds
+  # to prevent data leakage.
+  n_splits: 5
+
+  # Laplace smoothing parameter (alpha) for the Markov models.
+  # This helps to handle unseen transitions in the data.
+  alpha: 1.0
+
+  # --- Analysis Toggles ---
+  # Set these to true to run the corresponding analysis.
+
+  # Compares a coupled Markov model (M1) vs. an independent one (M0).
+  run_coupling_test: true
+
+  # Decomposes coupling into client->therapist and therapist->client influence.
+  run_directionality_test: true
