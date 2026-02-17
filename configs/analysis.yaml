@@ -51,3 +51,18 @@ analysis:
     n_null: 100
     random_seed: 42
     n_example_plots: 1
+
+  # --- Joint Affect Grammar Motifs by Regime ---
+  run_joint_affect_grammar: true
+  joint_affect_grammar:
+    hmm_dir: "artifacts/chmm"
+    processed_data_dir: "data/processed"
+    out_dir: "artifacts/joint_affect_grammar"
+    n_min: 10
+    ks: [2, 3]
+    top_n: 5
+    n_null: 200
+    random_seed: 42
+    min_null_windows: 15
+    min_null_duration: 30
+
