@@ -1,16 +1,20 @@
-.PHONY: all ingest-preprocess analysis notebooks
+.PHONY: all ingest-preprocess coupling hmm catrqa analysis clean
 
-all: ingest-preprocess analysis notebooks
+all: ingest-preprocess coupling hmm catrqa
 
 ingest-preprocess:
 	python scripts/01_ingest_and_preprocess.py --config configs/ingest_and_preprocess.yaml
 
-analysis:
+coupling:
 	python scripts/02_coupling_test.py --config configs/analysis.yaml
+
+hmm:
 	python scripts/03_fit_shared_hmm.py --config configs/analysis.yaml
 
-notebooks:
-	python scripts/run_notebook.py notebooks/coupling_test.ipynb
+catrqa:
+	python scripts/04_catRQA.py --config configs/analysis.yaml
+
+analysis: coupling hmm catrqa 
 
 clean:
 	find . -type f -name "*.pyc" -delete
