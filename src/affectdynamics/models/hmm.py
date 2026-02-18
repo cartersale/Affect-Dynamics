@@ -63,6 +63,15 @@ class SharedEmissionHMM:
         return logpT[:, T].T + logpC[:, C].T  # (Tlen,K)
 
     def score_sequences(self, seqs: list[tuple[np.ndarray, np.ndarray]]) -> float:
+        """
+        Compute the total log-likelihood of a list of observed sequences.
+
+        Args:
+            seqs: A list of (therapist_codes, client_codes) tuples.
+
+        Returns:
+            The sum of log-likelihoods for all sequences.
+        """
         # total log-likelihood across sequences
         ll = 0.0
         for T, C in seqs:

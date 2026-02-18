@@ -9,6 +9,17 @@ def _normalize_rows(A: np.ndarray) -> np.ndarray:
 
 
 def fit_markov_1(seqs, alpha: float = 1.0):
+    """
+    Fit a first-order Markov chain to a list of sequences.
+
+    Args:
+        seqs: A list of integer arrays (sequences) or a single integer array.
+        alpha: Laplace smoothing parameter (additive smoothing).
+
+    Returns:
+        A transition probability matrix P where P[i, j] is the probability 
+        of transitioning from state i to state j.
+    """
     if isinstance(seqs, np.ndarray):
         seqs = [seqs]
     # determine number of states
@@ -31,6 +42,20 @@ def fit_markov_1(seqs, alpha: float = 1.0):
 
 
 def fit_markov_2(prev1_seqs, prev2_seqs, next_seqs, alpha: float = 1.0):
+    """
+    Fit a second-order (coupled) Markov model.
+    Models P(next | prev1, prev2).
+
+    Args:
+        prev1_seqs: Sequences of the first predictor variable (e.g., self at t-1).
+        prev2_seqs: Sequences of the second predictor variable (e.g., partner at t-1).
+        next_seqs: Sequences of the target variable (e.g., self at t).
+        alpha: Laplace smoothing parameter.
+
+    Returns:
+        A 3D probability array P where P[i, j, k] is the probability of 
+        outcome k given antecedents i and j.
+    """
     if isinstance(prev1_seqs, np.ndarray):
         prev1_seqs = [prev1_seqs]
         prev2_seqs = [prev2_seqs]
