@@ -48,9 +48,6 @@ analysis:
     theiler_w: 1
     l_min: 2
     v_min: 2
-    n_null: 100
-    random_seed: 42
-    n_example_plots: 1
 
   # --- Joint Affect Grammar Motifs by Regime ---
   run_joint_affect_grammar: true

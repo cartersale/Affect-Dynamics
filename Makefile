@@ -17,7 +17,7 @@ catrqa:
 grammar:
 	python scripts/05_grammar.py --config configs/analysis.yaml
 
-analysis: coupling hmm catrqa grammar
+analysis: coupling hmm catrqa grammar 
 
 clean:
 	find . -type f -name "*.pyc" -delete
