@@ -129,30 +129,32 @@ def main():
     )
 
     args = p.parse_args()
-        cfg = load_config(Path(args.config))
-        cfg_data = cfg.get("data", {})
-        cfg_analysis = cfg.get("analysis", {})
+    cfg = load_config(Path(args.config))
+    cfg_data = cfg.get("data", {})
+    cfg_analysis = cfg.get("analysis", {})
 
-        processed_dir = Path(args.processed_dir or cfg_data.get("processed_dir", "data/processed"))
-        out_dir = Path(args.out_dir or cfg_analysis.get("hmm_out_dir", "artifacts/chmm"))
-        args.n_splits = int(args.n_splits if args.n_splits is not None else cfg_analysis.get("hmm_n_splits", 5))
-        args.k_min = int(args.k_min if args.k_min is not None else cfg_analysis.get("hmm_k_min", 2))
-        args.k_max = int(args.k_max if args.k_max is not None else cfg_analysis.get("hmm_k_max", 8))
-        args.n_iter = int(args.n_iter if args.n_iter is not None else cfg_analysis.get("hmm_n_iter", 150))
-        args.tol = float(args.tol if args.tol is not None else cfg_analysis.get("hmm_tol", 1e-4))
-        args.alpha_trans = (
-            args.alpha_trans
-            if args.alpha_trans is not None
-            else cfg_analysis.get("hmm_alpha_trans", [1.0])
-        )
-        args.alpha_emit = (
-            args.alpha_emit if args.alpha_emit is not None else cfg_analysis.get("hmm_alpha_emit", [1.0])
-        )
-        args.n_restarts = int(
-            args.n_restarts if args.n_restarts is not None else cfg_analysis.get("hmm_n_restarts", 3)
-        )
-        if args.refit_restarts is None:
-            args.refit_restarts = args.n_restarts
+    processed_dir = Path(args.processed_dir or cfg_data.get("processed_dir", "data/processed"))
+    out_dir = Path(args.out_dir or cfg_analysis.get("hmm_out_dir", "artifacts/chmm"))
+    args.n_splits = int(
+        args.n_splits if args.n_splits is not None else cfg_analysis.get("hmm_n_splits", 5)
+    )
+    args.k_min = int(args.k_min if args.k_min is not None else cfg_analysis.get("hmm_k_min", 2))
+    args.k_max = int(args.k_max if args.k_max is not None else cfg_analysis.get("hmm_k_max", 8))
+    args.n_iter = int(args.n_iter if args.n_iter is not None else cfg_analysis.get("hmm_n_iter", 150))
+    args.tol = float(args.tol if args.tol is not None else cfg_analysis.get("hmm_tol", 1e-4))
+    args.alpha_trans = (
+        args.alpha_trans
+        if args.alpha_trans is not None
+        else cfg_analysis.get("hmm_alpha_trans", [1.0])
+    )
+    args.alpha_emit = (
+        args.alpha_emit if args.alpha_emit is not None else cfg_analysis.get("hmm_alpha_emit", [1.0])
+    )
+    args.n_restarts = int(
+        args.n_restarts if args.n_restarts is not None else cfg_analysis.get("hmm_n_restarts", 3)
+    )
+    if args.refit_restarts is None:
+        args.refit_restarts = args.n_restarts
     out_dir.mkdir(parents=True, exist_ok=True)
 
     sessions, mf = load_sessions(processed_dir)
