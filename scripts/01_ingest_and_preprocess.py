@@ -149,7 +149,10 @@ def main():
     # Guardrail: fail fast if existing manifest appears to come from different preprocessing settings.
     manifest_path = out_dir / "processed_manifest.csv"
     if manifest_path.exists() and not args.clean_output:
-        existing = pd.read_csv(manifest_path)
+        try:
+            existing = pd.read_csv(manifest_path)
+        except pd.errors.EmptyDataError:
+            existing = pd.DataFrame()
         if not existing.empty:
             deb_cfg = cfg.get("debounce", {}) or {}
             win_cfg = cfg.get("windowing", {}) or {}

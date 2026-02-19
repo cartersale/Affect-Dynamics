@@ -2,7 +2,7 @@
 
 data:
   # Directory containing the raw SPAFF code CSV files.
-  raw_dir: /Users/cartersale/Research/Projects/TherapyData/SPAFF
+  raw_dir: data/raw
   # Directory where the processed Parquet files will be saved.
   processed_dir: data/processed
 
