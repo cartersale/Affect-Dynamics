@@ -9,6 +9,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import yaml
 
 from affectdynamics.eval.splits import groupkfold_splits
 from affectdynamics.models.hmm import SharedEmissionHMM
@@ -32,6 +33,13 @@ def n_steps(seqs: list[tuple[np.ndarray, np.ndarray]]) -> int:
     return int(sum(len(T) for T, _ in seqs))
 
 
+def load_config(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    with path.open() as f:
+        return yaml.safe_load(f) or {}
+
+
 def main():
     """
     Main entry point for the script.
@@ -46,45 +54,50 @@ def main():
     )
 
     # I/O
+    p.add_argument("--config", default="configs/analysis.yaml", help="Analysis YAML config.")
     p.add_argument(
         "--processed_dir",
         type=Path,
-        default="data/processed",
+        default=None,
         help="Directory containing processed session data.",
     )
     p.add_argument(
         "--out_dir",
         type=Path,
-        default="artifacts/chmm",
+        default=None,
         help="Directory to save model artifacts.",
     )
 
     # CV / sweep
     p.add_argument(
-        "--n_splits", type=int, default=5, help="Number of folds for cross-validation."
+        "--n_splits", type=int, default=None, help="Number of folds for cross-validation."
     )
-    p.add_argument("--k_min", type=int, default=2, help="Minimum number of hidden states (K).")
-    p.add_argument("--k_max", type=int, default=8, help="Maximum number of hidden states (K).")
+    p.add_argument(
+        "--k_min", type=int, default=None, help="Minimum number of hidden states (K)."
+    )
+    p.add_argument(
+        "--k_max", type=int, default=None, help="Maximum number of hidden states (K)."
+    )
 
     # EM
     p.add_argument(
-        "--n_iter", type=int, default=150, help="Maximum number of EM iterations."
+        "--n_iter", type=int, default=None, help="Maximum number of EM iterations."
     )
-    p.add_argument("--tol", type=float, default=1e-4, help="Convergence tolerance for EM.")
+    p.add_argument("--tol", type=float, default=None, help="Convergence tolerance for EM.")
 
     # Priors
     p.add_argument(
         "--alpha_trans",
         type=float,
         nargs="+",
-        default=[1.0],
+        default=None,
         help="Dirichlet prior for transition matrix rows.",
     )
     p.add_argument(
         "--alpha_emit",
         type=float,
         nargs="+",
-        default=[1.0],
+        default=None,
         help="Dirichlet prior for emission distributions.",
     )
 
@@ -92,7 +105,7 @@ def main():
     p.add_argument(
         "--n_restarts",
         type=int,
-        default=3,
+        default=None,
         help="Number of random restarts for each model fit in CV.",
     )
     p.add_argument(
@@ -116,11 +129,30 @@ def main():
     )
 
     args = p.parse_args()
-    if args.refit_restarts is None:
-        args.refit_restarts = args.n_restarts
+        cfg = load_config(Path(args.config))
+        cfg_data = cfg.get("data", {})
+        cfg_analysis = cfg.get("analysis", {})
 
-    processed_dir = Path(args.processed_dir)
-    out_dir = Path(args.out_dir)
+        processed_dir = Path(args.processed_dir or cfg_data.get("processed_dir", "data/processed"))
+        out_dir = Path(args.out_dir or cfg_analysis.get("hmm_out_dir", "artifacts/chmm"))
+        args.n_splits = int(args.n_splits if args.n_splits is not None else cfg_analysis.get("hmm_n_splits", 5))
+        args.k_min = int(args.k_min if args.k_min is not None else cfg_analysis.get("hmm_k_min", 2))
+        args.k_max = int(args.k_max if args.k_max is not None else cfg_analysis.get("hmm_k_max", 8))
+        args.n_iter = int(args.n_iter if args.n_iter is not None else cfg_analysis.get("hmm_n_iter", 150))
+        args.tol = float(args.tol if args.tol is not None else cfg_analysis.get("hmm_tol", 1e-4))
+        args.alpha_trans = (
+            args.alpha_trans
+            if args.alpha_trans is not None
+            else cfg_analysis.get("hmm_alpha_trans", [1.0])
+        )
+        args.alpha_emit = (
+            args.alpha_emit if args.alpha_emit is not None else cfg_analysis.get("hmm_alpha_emit", [1.0])
+        )
+        args.n_restarts = int(
+            args.n_restarts if args.n_restarts is not None else cfg_analysis.get("hmm_n_restarts", 3)
+        )
+        if args.refit_restarts is None:
+            args.refit_restarts = args.n_restarts
     out_dir.mkdir(parents=True, exist_ok=True)
 
     sessions, mf = load_sessions(processed_dir)
