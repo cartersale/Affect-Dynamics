@@ -27,7 +27,7 @@ analysis:
 
   # --- HMM Configuration ---
   run_hmm_fitting: true
-  hmm_out_dir: "artifacts/chmm"
+  hmm_out_dir: "artifacts/chmm_8_full_dataset"
   hmm_n_splits: 5
   hmm_k_min: 2
   hmm_k_max: 8
@@ -40,10 +40,10 @@ analysis:
   # --- Joint Affect catRQA by Regime ---
   run_joint_affect_catrqa: true
   joint_affect_catrqa:
-    hmm_dir: "artifacts/chmm"
+    hmm_dir: "artifacts/chmm_8_full_dataset"
     processed_data_dir: "data/processed"
     out_dir: "artifacts/joint_affect_catRQA"
-    n_min: 10
+    n_min: 5
     plot_n_min: 30
     theiler_w: 1
     l_min: 2
@@ -52,10 +52,10 @@ analysis:
   # --- Joint Affect Grammar Motifs by Regime ---
   run_joint_affect_grammar: true
   joint_affect_grammar:
-    hmm_dir: "artifacts/chmm"
+    hmm_dir: "artifacts/chmm_8_full_dataset"
     processed_data_dir: "data/processed"
     out_dir: "artifacts/joint_affect_grammar"
-    n_min: 10
+    n_min: 5
     ks: [2, 3]
     top_n: 5
     n_null: 200
