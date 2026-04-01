@@ -1,0 +1,61 @@
+# Session-wise persistent homology on HMM posterior trajectories.
+
+data:
+  processed_dir: data/processed
+  # Sampling interval of processed sequences in seconds.
+  sample_dt_sec: 1.0
+
+model:
+  # Directory containing best_model.json from scripts/03_fit_shared_hmm.py
+  hmm_dir: artifacts/chmm_8_full_dataset
+  model_json: artifacts/chmm_8_full_dataset/best_model.json
+
+topology:
+  out_dir: artifacts/regime_geometry/topology_ph
+  random_seed: 42
+
+  # Delay/sliding-window embedding grid.
+  embedding_m: [10]
+  tau_sec: [1]
+
+  # Distance metric used in point-cloud geometry.
+  # Supported: euclidean, cosine
+  metric: [euclidean]
+
+  # Subsampling strategy after embedding.
+  # Supported: none, stride, uniform, fps
+  subsample_method: [stride]
+
+  # Used by stride subsampling.
+  stride_sec: 5
+
+  # Used by uniform subsampling.
+  uniform_n_points: null
+  uniform_fraction: null
+
+  # Used by furthest-point subsampling.
+  fps_n_points: null
+  fps_fraction: null
+
+  # VR filtration cap.
+  # max_edge_mode: quantile => max_edge determined from pairwise-distance quantile
+  # max_edge_mode: fixed    => use max_edge_value directly
+  max_edge_mode: quantile
+  max_edge_quantile: 0.95
+  max_edge_value: null
+
+  # Persistent H1 feature count threshold.
+  h1_persistence_threshold: 0.05
+
+  # Resolution for topological summaries.
+  betti_bins: 64
+  landscape_bins: 128
+  pimage_bins_birth: 32
+  pimage_bins_persistence: 32
+  pimage_sigma: 0.05
+
+nulls:
+  run_time_shuffle: true
+  run_block_shuffle: true
+  n_null: 100
+  block_len_sec: 30

@@ -1,0 +1,36 @@
+# Local sliding PH analysis around Viterbi switches.
+
+data:
+  processed_dir: data/processed
+  sample_dt_sec: 1.0
+
+model:
+  hmm_dir: artifacts/chmm_8_full_dataset
+  model_json: artifacts/chmm_8_full_dataset/best_model.json
+  decoded_sessions_csv: artifacts/chmm_8_full_dataset/decoded_sessions.csv
+
+# Output directory for phase-transition topology products.
+out_dir: artifacts/regime_geometry/phase_transitions
+
+embedding:
+  # Delay embedding for posterior trajectories.
+  m: 10
+  tau_sec: 1
+
+rolling:
+  # Rolling PH windows over the embedded trajectory.
+  window_sec: 30
+  step_sec: 5
+
+switch_alignment:
+  # Align rolling PH rows to switch anchors within +/- window_sec.
+  window_sec: 30
+  # 'during' interval is [-during_half_band_sec, +during_half_band_sec].
+  during_half_band_sec: 5
+
+ph:
+  metric: euclidean
+  max_edge_mode: quantile
+  max_edge_quantile: 0.95
+  max_edge_value: null
+  betti_bins: 64
