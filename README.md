@@ -100,7 +100,7 @@ After running the pipeline, you can explore the results using the provided noteb
 -   `notebooks/catrqa_analysis.ipynb`: Analyze recurrence metrics.
 -   `notebooks/grammar_analysis.ipynb`: Explore affect motifs and grammar statistics.
 -   `notebooks/regime_geometry.ipynb`: Explore geometric structure of HMM regimes (state embeddings, transition graphs, PCA/UMAP of emissions, and trajectory visualizations).
-
+-   `notebooks/alliance_scores.ipynb`: Explore the relationship between coupling and regime dynamics and alliance ratings given by the therapist and client.
 
 ## Configuration
 
