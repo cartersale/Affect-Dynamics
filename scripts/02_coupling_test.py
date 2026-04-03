@@ -12,6 +12,7 @@ import json
 import sys       
 from pathlib import Path  
 import hashlib   
+import re
 
 # Add the source directory to the system path so we can import custom modules
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -33,6 +34,54 @@ from affectdynamics.schemas import Session # Represents a therapy session
 
 # A small value to avoid division by zero
 EPS = 1e-12
+
+
+def extract_video_num_from_dyad_id(dyad_id: str) -> int | None:
+    m = re.match(r"^(\d+)", str(dyad_id))
+    if m is None:
+        return None
+    return int(m.group(1))
+
+
+def build_therapist_groups(mf: pd.DataFrame, therapist_map_csv: Path) -> list[str]:
+    if not therapist_map_csv.exists():
+        raise FileNotFoundError(f"Missing therapist mapping CSV: {therapist_map_csv}")
+
+    mapping = pd.read_csv(therapist_map_csv)
+    required = {"therapist_code", "video_code"}
+    missing = required - set(mapping.columns)
+    if missing:
+        raise ValueError(
+            f"Therapist mapping file missing required columns {missing}: {therapist_map_csv}"
+        )
+
+    mapping = mapping[["therapist_code", "video_code"]].copy()
+    mapping["video_num"] = pd.to_numeric(mapping["video_code"], errors="coerce")
+    mapping = mapping.dropna(subset=["video_num"])
+    mapping["video_num"] = mapping["video_num"].astype(int)
+    mapping["therapist_code"] = mapping["therapist_code"].astype(str).str.strip()
+
+    video_to_therapist = dict(zip(mapping["video_num"], mapping["therapist_code"]))
+
+    groups: list[str] = []
+    missing_count = 0
+    for _, row in mf.iterrows():
+        dyad_id = str(row["dyad_id"])
+        video_num = extract_video_num_from_dyad_id(dyad_id)
+        therapist_code = video_to_therapist.get(video_num) if video_num is not None else None
+        if therapist_code is None or therapist_code == "":
+            missing_count += 1
+            groups.append(f"UNMAPPED_{dyad_id}")
+        else:
+            groups.append(f"THER_{therapist_code}")
+
+    print(
+        "Therapist-grouped CV mapping:",
+        f"mapped={len(groups) - missing_count}",
+        f"unmapped={missing_count}",
+        f"unique_groups={len(set(groups))}",
+    )
+    return groups
 
 # Loads all session data from the processed directory.
 # Returns a list of session objects and a table describing each session.
@@ -100,10 +149,15 @@ def aggregate_by_dyad(df: pd.DataFrame, value_col: str, weight_col: str) -> pd.D
 # Uses statistical models to compare independent and coupled behaviors.
 # Returns a table of results for each session.
 def run_coupling_test(
-    sessions: list[Session], mf: pd.DataFrame, n_splits: int, alpha: float
+    sessions: list[Session],
+    mf: pd.DataFrame,
+    n_splits: int,
+    alpha: float,
+    groups: list[str] | None = None,
 ) -> pd.DataFrame:
     # Split the data into groups so each dyad is kept together
-    groups = mf["dyad_id"].astype(str).tolist()
+    if groups is None:
+        groups = mf["dyad_id"].astype(str).tolist()
     splits = groupkfold_splits(groups, n_splits=n_splits)
     
     rows: list[dict] = []
@@ -215,10 +269,15 @@ def run_coupling_test(
 # Uses statistical models to compare independent and coupled behaviors for each direction.
 # Returns a table of results for each session.
 def run_directionality_test(
-    sessions: list[Session], mf: pd.DataFrame, n_splits: int, alpha: float
+    sessions: list[Session],
+    mf: pd.DataFrame,
+    n_splits: int,
+    alpha: float,
+    groups: list[str] | None = None,
 ) -> pd.DataFrame:
     # Split the data so each dyad stays together
-    groups = mf["dyad_id"].astype(str).tolist()
+    if groups is None:
+        groups = mf["dyad_id"].astype(str).tolist()
     splits = groupkfold_splits(groups, n_splits=n_splits)
     rows: list[dict] = []
 
@@ -291,9 +350,9 @@ def run_directionality_test(
 
 # Saves the coupling test results to files for later review.
 # Produces both detailed and summary tables.
-def save_coupling_outputs(coupling_res: pd.DataFrame, out_dir: Path) -> None:
+def save_coupling_outputs(coupling_res: pd.DataFrame, out_dir: Path, suffix: str = "") -> None:
     # Save all session-level results
-    coupling_res.to_csv(out_dir / "coupling_results.csv", index=False)
+    coupling_res.to_csv(out_dir / f"coupling_results{suffix}.csv", index=False)
 
     # Summarize results for each dyad
     dyad_coupling = aggregate_by_dyad(coupling_res, "gain_per_trans", "n_transitions")
@@ -308,15 +367,19 @@ def save_coupling_outputs(coupling_res: pd.DataFrame, out_dir: Path) -> None:
     )
     dyad_coupling = dyad_coupling.merge(extras, on="dyad_id", how="left")
     # Save the summary table
-    dyad_coupling.to_csv(out_dir / "coupling_by_dyad.csv", index=False)
+    dyad_coupling.to_csv(out_dir / f"coupling_by_dyad{suffix}.csv", index=False)
 
 
 
 # Saves the directionality test results to files for later review.
 # Produces both detailed and summary tables.
-def save_directionality_outputs(directionality_res: pd.DataFrame, out_dir: Path) -> None:
+def save_directionality_outputs(
+    directionality_res: pd.DataFrame,
+    out_dir: Path,
+    suffix: str = "",
+) -> None:
     # Save all session-level results
-    directionality_res.to_csv(out_dir / "directionality_results.csv", index=False)
+    directionality_res.to_csv(out_dir / f"directionality_results{suffix}.csv", index=False)
 
     # Summarize results for each dyad, for both directions
     dyad_dir_T = aggregate_by_dyad(directionality_res, "dT_per_trans", "nT")
@@ -337,7 +400,7 @@ def save_directionality_outputs(directionality_res: pd.DataFrame, out_dir: Path)
     dyad_dir["dC_wmean"] = dyad_dir["dC_per_trans_wmean"]
 
     # Save the summary table
-    dyad_dir.to_csv(out_dir / "directionality_by_dyad.csv", index=False)
+    dyad_dir.to_csv(out_dir / f"directionality_by_dyad{suffix}.csv", index=False)
 
 
 
@@ -412,6 +475,14 @@ def main() -> None:
     run_horizon = args.run_directionality_horizon or bool(
         cfg_analysis.get("run_directionality_horizon", False)
     )
+    run_therapist_grouped_cv = bool(cfg_analysis.get("run_therapist_grouped_cv", False))
+    therapist_grouped_cv_n_splits = int(cfg_analysis.get("therapist_grouped_cv_n_splits", 5))
+    therapist_map_csv = Path(
+        cfg_analysis.get(
+            "therapist_map_csv",
+            "data/demographics_alliance/cleaned_outputs/therapist_summary_long.csv",
+        )
+    )
 
     # Create output directory if it doesn't exist
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -438,6 +509,37 @@ def main() -> None:
             raise RuntimeError("No directionality results computed.")
         save_directionality_outputs(directionality_res, out_dir)
         print(f"Saved directionality outputs to {out_dir}")
+
+    if run_therapist_grouped_cv:
+        print("Running therapist-grouped CV robustness analysis...")
+        therapist_groups = build_therapist_groups(mf, therapist_map_csv)
+        suffix = "_therapist_grouped_cv"
+
+        if run_coupling:
+            coupling_res_tg = run_coupling_test(
+                sessions,
+                mf,
+                therapist_grouped_cv_n_splits,
+                alpha,
+                groups=therapist_groups,
+            )
+            if coupling_res_tg.empty:
+                raise RuntimeError("No therapist-grouped coupling results computed.")
+            save_coupling_outputs(coupling_res_tg, out_dir, suffix=suffix)
+            print(f"Saved therapist-grouped coupling outputs to {out_dir}")
+
+        if run_directionality:
+            directionality_res_tg = run_directionality_test(
+                sessions,
+                mf,
+                therapist_grouped_cv_n_splits,
+                alpha,
+                groups=therapist_groups,
+            )
+            if directionality_res_tg.empty:
+                raise RuntimeError("No therapist-grouped directionality results computed.")
+            save_directionality_outputs(directionality_res_tg, out_dir, suffix=suffix)
+            print(f"Saved therapist-grouped directionality outputs to {out_dir}")
 
     # Run directionality horizon summary if requested
     if run_horizon:

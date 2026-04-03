@@ -25,6 +25,12 @@ analysis:
   # Decomposes coupling into client->therapist and therapist->client influence.
   run_directionality_test: true
 
+  # Robustness toggle: rerun coupling/directionality with therapist-grouped CV.
+  # Outputs are saved with suffix: _therapist_grouped_cv
+  run_therapist_grouped_cv: true
+  therapist_grouped_cv_n_splits: 5
+  therapist_map_csv: data/demographics_alliance/cleaned_outputs/therapist_summary_long.csv
+
   # --- HMM Configuration ---
   run_hmm_fitting: true
   hmm_out_dir: "artifacts/chmm_8_full_dataset"
