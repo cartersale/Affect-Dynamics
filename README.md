@@ -1,6 +1,6 @@
 # Affect-Dynamics
 
-This repository contains a complete pipeline for analyzing dyadic affect dynamics using Hidden Markov Models (HMMs), Recurrence Quantification Analysis (RQA), and motif/grammar analysis. 
+This repository contains a complete pipeline for analyzing dyadic affect dynamics using Hidden Markov Models (HMMs), Recurrence Quantification Analysis (RQA), and motif/grammar analysis. Data is available here [https://osf.io/5h7ct/overview]
 
 ## Project Structure
 
