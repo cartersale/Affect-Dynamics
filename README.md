@@ -1,10 +1,10 @@
 # Affect-Dynamics
 
-This repository contains a complete pipeline for analyzing dyadic affect dynamics using Hidden Markov Models (HMMs), Recurrence Quantification Analysis (RQA), and motif/grammar analysis. 
+This repository contains a complete pipeline for analyzing dyadic affect dynamics using Hidden Markov Models (HMMs), Recurrence Quantification Analysis (RQA), motif/grammar analysis, and switch-centered topological summaries of regime transitions.
 
 ## Project Structure
 
-- **`scripts/`**: The core analysis pipeline. Scripts are numbered `01` through `05` to indicate execution order.
+- **`scripts/`**: The core analysis pipeline. The main pipeline runs through `01` to `05`, with additional downstream analyses for topology and switch-centered transition summaries.
 - **`src/`**: The `affectdynamics` Python package containing reusable logic for models, preprocessing, and metrics.
 - **`notebooks/`**: Jupyter notebooks for interactive analysis and visualization of results.
 - **`configs/`**: YAML configuration files controlling parameters for all scripts.
@@ -48,7 +48,7 @@ This repository contains a complete pipeline for analyzing dyadic affect dynamic
 
 ## Workflow
 
-The analysis pipeline consists of five main steps. You can run them individually or use the `Makefile` shortcuts.
+The analysis pipeline consists of five main core steps plus an additional transition-topology analysis. You can run them individually or use the `Makefile` shortcuts.
 
 ### 1. Data Ingestion & Preprocessing
 **Script**: `scripts/01_ingest_and_preprocess.py`  
@@ -79,6 +79,12 @@ The analysis pipeline consists of five main steps. You can run them individually
 **Description**: Extracts recurrent sequences (k-grams/motifs) of joint affect within HMM regimes. Computes entropy, diversity, and top motifs to characterize the texture of interaction in each state.
 **Output**: `artifacts/grammar_episode_results.csv`.
 
+### 6. Switch-Centered Phase-Transition Topology
+**Script**: `scripts/07_phase_transitions.py`
+**Description**: Reconstructs posterior trajectories from the fitted HMM, computes rolling persistent-homology summaries around Viterbi switch points, and exports switch-level before/during/after summaries and transition-specific topology tables for downstream statistical analysis.
+**Config**: `configs/phase_transitions.yaml`
+**Output**: `artifacts/regime_geometry/phase_transitions/`
+
 ## Using the Makefile
 
 The `Makefile` provides convenient shortcuts for running the pipeline:
@@ -100,6 +106,7 @@ After running the pipeline, you can explore the results using the provided noteb
 -   `notebooks/catrqa_analysis.ipynb`: Analyze recurrence metrics.
 -   `notebooks/grammar_analysis.ipynb`: Explore affect motifs and grammar statistics.
 -   `notebooks/regime_geometry.ipynb`: Explore geometric structure of HMM regimes (state embeddings, transition graphs, PCA/UMAP of emissions, and trajectory visualizations).
+-   `notebooks/phase_transitions.ipynb`: Generate the statistical summaries and figures for the switch-centered topology analysis used in the paper.
 -   `notebooks/alliance_scores.ipynb`: Explore the relationship between coupling and regime dynamics and alliance ratings given by the therapist and client.
 
 ## Configuration
@@ -107,5 +114,6 @@ After running the pipeline, you can explore the results using the provided noteb
 All parameters (paths, hyperparameters, toggles) are defined in:
 -   `configs/ingest_and_preprocess.yaml`: For step 1.
 -   `configs/analysis.yaml`: For steps 2-5.
+-   `configs/phase_transitions.yaml`: For the switch-centered phase-transition topology analysis.
 
 Modify these files to change input directories, model parameters (e.g., number of HMM states range), or analysis settings.
