@@ -235,7 +235,7 @@ def main():
     l_min = int(ja_cfg.get("l_min", 2))
     v_min = int(ja_cfg.get("v_min", 2))
     n_example_plots = int(ja_cfg.get("n_example_plots", 3))
-    n_null = int(ja_cfg.get("n_null", 100))
+    n_null = int(ja_cfg.get("n_null", 200)) # Number of null surrogates for significance testing
 
     # Set random seed for reproducibility
     random_seed = ja_cfg.get("random_seed", None)

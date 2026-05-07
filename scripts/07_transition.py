@@ -67,6 +67,23 @@ def posterior_matrix(model: SharedEmissionHMM, session: Session) -> np.ndarray:
     return model.posterior(t_codes[:n], c_codes[:n])
 
 
+def posterior_entropy(posterior_row: np.ndarray) -> float:
+    p = np.asarray(posterior_row, dtype=float)
+    p = p[np.isfinite(p) & (p > 0)]
+    if p.size == 0:
+        return 0.0
+    return float(-np.sum(p * np.log(p)))
+
+
+def posterior_local_speed(posterior: np.ndarray) -> np.ndarray:
+    if posterior.ndim != 2 or len(posterior) == 0:
+        return np.empty((0,), dtype=float)
+    speed = np.zeros(len(posterior), dtype=float)
+    if len(posterior) > 1:
+        speed[1:] = np.linalg.norm(np.diff(posterior, axis=0), axis=1)
+    return speed
+
+
 def build_delay_embedding(
     posterior: np.ndarray,
     *,
@@ -231,11 +248,11 @@ def run_phase_transitions(config_path: Path) -> None:
     processed_dir = Path(data_cfg.get("processed_dir", "data/processed"))
     sample_dt_sec = _safe_float(data_cfg.get("sample_dt_sec", 1.0), 1.0)
 
-    hmm_dir = Path(model_cfg.get("hmm_dir", "artifacts/chmm_8_full_dataset"))
+    hmm_dir = Path(model_cfg.get("hmm_dir", "artifacts/03_chmm_outputs/chmm_8_full_dataset"))
     model_json = Path(model_cfg.get("model_json", hmm_dir / "best_model.json"))
     decoded_csv = Path(model_cfg.get("decoded_sessions_csv", hmm_dir / "decoded_sessions.csv"))
 
-    out_dir = Path(cfg.get("out_dir", "artifacts/regime_geometry/phase_transitions"))
+    out_dir = Path(cfg.get("out_dir", "artifacts/07_transitions"))
     out_dir.mkdir(parents=True, exist_ok=True)
 
     m = _safe_int(emb_cfg.get("m", 10), 10)
@@ -289,6 +306,8 @@ def run_phase_transitions(config_path: Path) -> None:
 
         viterbi = viterbi[:t_len]
         posterior = posterior[:t_len]
+        entropy_series = np.apply_along_axis(posterior_entropy, 1, posterior)
+        local_speed_series = posterior_local_speed(posterior)
 
         emb, centers = build_delay_embedding(posterior, m=m, tau_steps=tau_steps)
         if len(emb) < 3:
@@ -319,6 +338,8 @@ def run_phase_transitions(config_path: Path) -> None:
                 "metric": metric,
                 "m": int(m),
                 "tau_sec": float(tau_sec),
+                "posterior_entropy": float(entropy_series[c]),
+                "local_speed_l2": float(local_speed_series[c]),
                 **ph,
             }
             session_roll_rows.append(rr)

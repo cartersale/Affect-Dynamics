@@ -2,7 +2,7 @@
 
 data:
   # Directory where the processed Parquet files are located.
-  processed_dir: data/processed
+  processed_dir: data/processed/sensitivity/
 
 analysis:
   # Directory where the analysis results (CSV files) will be saved.
@@ -33,9 +33,9 @@ analysis:
 
   # --- HMM Configuration ---
   run_hmm_fitting: true
-  hmm_out_dir: "artifacts/chmm_8_full_dataset"
+  hmm_out_dir: "artifacts/chmm_8_sensitivty"
   hmm_n_splits: 5
-  hmm_k_min: 2
+  hmm_k_min: 8
   hmm_k_max: 8
   hmm_n_iter: 150
   hmm_tol: 1.0e-4

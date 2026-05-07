@@ -2,9 +2,9 @@
 
 data:
   # Directory containing the raw SPAFF code CSV files.
-  raw_dir: data/raw
+  raw_dir: data/raw_spaff_pose_aligned
   # Directory where the processed Parquet files will be saved.
-  processed_dir: data/processed
+  processed_dir: data/processed/sensitivity
 
 ingestion:
   # Path to the CSV file containing the SPAFF code legend.

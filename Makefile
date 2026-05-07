@@ -17,6 +17,9 @@ catrqa:
 grammar:
 	python scripts/05_grammar.py --config configs/analysis.yaml
 
+transition:
+	python scripts/07_transition.py --config configs/analysis.yaml
+
 analysis: coupling hmm catrqa grammar 
 
 clean:
