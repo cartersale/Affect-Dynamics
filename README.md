@@ -2,12 +2,6 @@
 
 This repository contains a complete pipeline for analyzing dyadic affect dynamics using Hidden Markov Models (HMMs), Recurrence Quantification Analysis (RQA), motif/grammar analysis, and switch-centered topological summaries of regime transitions. Data is available on [OSF](https://osf.io/5h7ct/overview).
 
-## Analysis Pipeline
-
-The methodological workflow is summarized in the pipeline figure below, from second-by-second SPAFF affect streams through coupling tests, shared-latent HMM inference, and downstream regime analyses.
-
-![Methods pipeline for affect-dynamics analyses](methods_pipeline.png)
-
 ## Project Structure
 
 - **`scripts/`**: The core analysis pipeline. The main pipeline runs through `01` to `05`, with additional downstream analyses for topology and switch-centered transition summaries.
