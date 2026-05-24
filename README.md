@@ -1,6 +1,6 @@
 # Affect-Dynamics
 
-This repository contains a complete pipeline for analyzing dyadic affect dynamics using Hidden Markov Models (HMMs), Recurrence Quantification Analysis (RQA), motif/grammar analysis, and switch-centered topological summaries of regime transitions.
+This repository contains a complete pipeline for analyzing dyadic affect dynamics using Hidden Markov Models (HMMs), Recurrence Quantification Analysis (RQA), motif/grammar analysis, and switch-centered topological summaries of regime transitions. Data is available on [OSF](https://osf.io/5h7ct/overview).
 
 ## Analysis Pipeline
 
