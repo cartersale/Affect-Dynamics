@@ -285,6 +285,7 @@ def run_phase_transitions(config_path: Path) -> None:
     switch_rows: list[dict[str, Any]] = []
     aligned_rows: list[dict[str, Any]] = []
     pseudo_aligned_rows: list[dict[str, Any]] = []
+    session_max_time_idx: dict[str, int] = {}
 
     for _, row in tqdm(dec.iterrows(), total=len(dec), desc="Sessions", unit="session"):
         session_id = str(row["session_id"])
@@ -348,6 +349,7 @@ def run_phase_transitions(config_path: Path) -> None:
         if not session_roll_rows:
             continue
         df_roll = pd.DataFrame(session_roll_rows)
+        session_max_time_idx[session_id] = int(df_roll["time_idx"].max())
 
         switches = detect_switches(viterbi)
 
@@ -447,7 +449,7 @@ def run_phase_transitions(config_path: Path) -> None:
         real_norm_time = aligned_df[['session_id', 'switch_time_idx']].drop_duplicates().copy()
         pseudo_norm_time = pseudo_aligned_df[['session_id', 'switch_time_idx']].drop_duplicates().copy()
 
-        session_lengths = df_roll.groupby('session_id')['time_idx'].max().to_dict()
+        session_lengths = session_max_time_idx
 
         real_norm_time['norm_time'] = real_norm_time.apply(
             lambda r: r['switch_time_idx'] / session_lengths.get(r['session_id'], 1), axis=1
