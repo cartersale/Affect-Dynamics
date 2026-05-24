@@ -33,6 +33,9 @@ This repository contains a complete pipeline for analyzing dyadic affect dynamic
     pip install -e .
     ```
 
+4.  **Download the SPAFF data**:
+    Download the data from [OSF](https://osf.io/5h7ct/overview) and place the raw SPAFF files in `data/raw/`.
+
 ### Option B: Docker
 
 1.  **Build the Docker image**:
