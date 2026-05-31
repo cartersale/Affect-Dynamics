@@ -253,6 +253,8 @@ def main():
 
 	# These control thresholds and paths used across the analysis.
 	hmm_dir = Path(ga_cfg["hmm_dir"])
+	hmm_k = ga_cfg.get("hmm_k", None)
+	hmm_suffix = f"_K{int(hmm_k)}" if hmm_k is not None else ""
 	processed_data_dir = Path(ga_cfg["processed_data_dir"])
 	out_dir = Path(ga_cfg["out_dir"])
 	out_dir.mkdir(parents=True, exist_ok=True)
@@ -270,7 +272,13 @@ def main():
 	min_null_windows = int(ga_cfg.get("min_null_windows", 30))
 	min_null_duration = int(ga_cfg.get("min_null_duration", 60))
 
-	decoded_sessions = pd.read_csv(hmm_dir / "decoded_sessions.csv")
+	decoded_csv = hmm_dir / f"decoded_sessions{hmm_suffix}.csv"
+	if not decoded_csv.exists():
+		raise FileNotFoundError(
+			f"Missing decoded sessions file for hmm_k={hmm_k}: {decoded_csv}. "
+			"Run the HMM refit/decode for that K first."
+		)
+	decoded_sessions = pd.read_csv(decoded_csv)
 	sessions, _ = load_sessions(processed_data_dir)
 	session_map = {s.session_id: s for s in sessions}
 
@@ -278,7 +286,7 @@ def main():
 
 	for _, row in tqdm(decoded_sessions.iterrows(), total=len(decoded_sessions)):
 		session_id = row["session_id"]
-		path_file = hmm_dir / f"{session_id}_viterbi.npy"
+		path_file = hmm_dir / f"{session_id}_viterbi{hmm_suffix}.npy"
 		if not path_file.exists():
 			continue
 
@@ -490,11 +498,12 @@ def main():
 			"min_null_windows": min_null_windows,
 			"min_null_duration": min_null_duration,
 		},
-		"inputs": {
-			"hmm_dir": str(hmm_dir),
-			"processed_data_dir": str(processed_data_dir),
-			"decoded_sessions_csv": str(hmm_dir / "decoded_sessions.csv"),
-		},
+			"inputs": {
+				"hmm_dir": str(hmm_dir),
+				"hmm_k": int(hmm_k) if hmm_k is not None else None,
+				"processed_data_dir": str(processed_data_dir),
+				"decoded_sessions_csv": str(decoded_csv),
+			},
 		"outputs": {
 			"out_dir": str(out_dir),
 			"episode_results_csv": str(results_path),

@@ -224,6 +224,8 @@ def main():
     # Load configs for this specific analysis
     ja_cfg = cfg["analysis"]["joint_affect_catrqa"]
     hmm_dir = Path(ja_cfg["hmm_dir"])
+    hmm_k = ja_cfg.get("hmm_k", None)
+    hmm_suffix = f"_K{int(hmm_k)}" if hmm_k is not None else ""
     processed_data_dir = Path(ja_cfg["processed_data_dir"])
     out_dir = Path(ja_cfg["out_dir"])
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -245,7 +247,13 @@ def main():
 
     # --- Data Loading ---
     # Load session metadata and map session IDs to session objects
-    decoded_sessions = pd.read_csv(hmm_dir / "decoded_sessions.csv")
+    decoded_csv = hmm_dir / f"decoded_sessions{hmm_suffix}.csv"
+    if not decoded_csv.exists():
+        raise FileNotFoundError(
+            f"Missing decoded sessions file for hmm_k={hmm_k}: {decoded_csv}. "
+            "Run the HMM refit/decode for that K first."
+        )
+    decoded_sessions = pd.read_csv(decoded_csv)
     sessions, _ = load_sessions(processed_data_dir)
     session_map = {s.session_id: s for s in sessions}
 
@@ -259,7 +267,7 @@ def main():
         session_id = row["session_id"]
 
         # Load Viterbi path
-        path_file = hmm_dir / f"{session_id}_viterbi.npy"
+        path_file = hmm_dir / f"{session_id}_viterbi{hmm_suffix}.npy"
         if not path_file.exists():
             continue
         viterbi_path = np.load(path_file)
@@ -365,8 +373,9 @@ def main():
         },
         "inputs": {
             "hmm_dir": str(hmm_dir),
+            "hmm_k": int(hmm_k) if hmm_k is not None else None,
             "processed_data_dir": str(processed_data_dir),
-            "decoded_sessions_csv": str(hmm_dir / "decoded_sessions.csv"),
+            "decoded_sessions_csv": str(decoded_csv),
         },
         "outputs": {
             "out_dir": str(out_dir),
