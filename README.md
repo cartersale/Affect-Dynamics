@@ -94,7 +94,7 @@ The `Makefile` provides convenient shortcuts for running the pipeline:
 
 -   `make ingest-preprocess`: Runs step 1 (Ingest).
 -   `make coupling`: Runs step 2 (Coupling).
--   `make hmm`: Runs step 3 (HMM Fitting). **Warning: This step takes a long time.**
+-   `make hmm`: Runs step 3 (HMM Fitting). Fitting checkpoints each completed restart and fold under the configured HMM output directory, resumes interrupted runs automatically, and runs independent restarts in parallel according to `hmm_n_jobs`.
 -   `make catrqa`: Runs step 4 (catRQA).
 -   `make grammar`: Runs step 5 (Grammar).
 -   `make analysis`: **Runs steps 2 through 5 sequentially.** Because this includes the HMM fitting step, `make analysis` will take a significant amount of time to complete. It is often better to run steps individually for debugging or if you only need specific results. 
